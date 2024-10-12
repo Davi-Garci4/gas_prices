@@ -15,6 +15,7 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.FLATLY, dbc_css])
 app.scripts.config.serve_locally = True
 server = app.server
 
+print(FONT_AWESOME)
 # ========== Styles ============ #
 
 template_theme1 = "flatly"
@@ -22,6 +23,7 @@ template_theme2 = "vapor"
 url_theme1 = dbc.themes.FLATLY
 url_theme2 = dbc.themes.VAPOR
 
+tab_card={'height': '100%'}
 
 # ===== Reading n cleaning File ====== #
 df_main = pd.read_csv("data_gas.csv")
@@ -46,13 +48,45 @@ df_main.drop(['UNIDADE DE MEDIDA', 'COEF DE VARIAÇÃO REVENDA','COEF DE VARIAÇ
               'DESVIO PADRÃO DISTRIBUIÇÃO', 'MARGEM MÉDIA REVENDA', 'PREÇO MÍNIMO REVENDA', 'PREÇO MÁXIMO REVENDA',
               'PRODUTO', 'PREÇO MÉDIO DISTRIBUIÇÃO', 'DESVIO PADRÃO REVENDA','PREÇO MÍNIMO DISTRIBUIÇÃO'], inplace=True, axis=1) #axis=1 signiifica que está sendo exluido na vertical e não na horizontal
 
+df_store = df_main.to_dict() #Transformando o daframe em dicionario 
+
 # =========  Layout  =========== #
+#Todo o layout está envolvido por um container
 app.layout = dbc.Container(children=[
-    
+    #Armazenar o dataset
+    dcc.Store(id='dataset', data=df_store), 
+    dcc.Store(id='dataset_fixed', data=df_store),
+    #Layout
+    #Row 1
+    #Sempre é necessario especificar as linhas e dentros das linhas conter as colunas e dentro das colunas inserimos o conteúdo
+    dbc.Row([
+        dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+                    dbc.Row([
+                        dbc.Col([
+                            html.Legend("Gas Prices Analytics")
+                        ], sm=8), #Significa que são ocupadas 8 posições dessas colunas 
+                        dbc.Col([
+                            html.I(className='fa-fa-filter', style={'font-size': '300%'})
+                        ], sm=4, align="center")
+                    ]),
+                    dbc.Row([
+                        dbc.Col([
+                            ThemeSwitchAIO(aio_id="theme", themes=[url_theme1, url_theme2]),
+                            html.Legend("Davi Garcia")
+                        ])
+                    ], style={'margin-top':'10px'}),
+                    dbc.Row([
+                        dbc.Col([
+                            dbc.Button("Meu LinkedIn", href="https://www.linkedin.com/in/davi-nascimento-garcia/", target="_blank")
+                        ])
+                    ], style={'margin-top':'10px'})
+                ])
+            ], style=tab_card)
+        ], sm=4, lg=2)
 
-
-
-
+    ])
 ], fluid=True, style={'height': '100%'})
 
 
