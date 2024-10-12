@@ -4,12 +4,12 @@ import dash_bootstrap_components as dbc
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
-from dash_bootstrap_templates import ThemeSwitchAIO
+from dash_bootstrap_templates import ThemeSwitchAIO # Serve para mudar o tema do dash
 
 
 # ========= App ============== #
-FONT_AWESOME = ["https://use.fontawesome.com/releases/v5.10.2/css/all.css"]
-dbc_css = "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.4/dbc.min.css"
+FONT_AWESOME = ["https://use.fontawesome.com/releases/v5.10.2/css/all.css"] # Para trazer os icones 
+dbc_css = "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.4/dbc.min.css" # Auxiliar na troca de tema do dash 
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.FLATLY, dbc_css])
 app.scripts.config.serve_locally = True
@@ -26,8 +26,25 @@ url_theme2 = dbc.themes.VAPOR
 # ===== Reading n cleaning File ====== #
 df_main = pd.read_csv("data_gas.csv")
 
+df_main.info()
 
+df_main['DATA INICIAL'] = pd.to_datetime(df_main['DATA INICIAL'])
+df_main['DATA FINAL'] = pd.to_datetime(df_main['DATA FINAL'])
 
+df_main['DATA MEDIA'] = ((df_main['DATA INICIAL'] - df_main['DATA FINAL'])/2) + df_main['DATA INICIAL']
+df_main = df_main.sort_values(by='DATA MEDIA', ascending=True) #Ordenando o dataframe pela data média da menor para maior 
+df_main.rename(columns= {'DATA MEDIA': 'DATA'}, inplace=True) # O inplace serve para alterar o df_main original 
+df_main.rename(columns={'PREÇO MÉDIO REVENDA': 'VALOR REVENDA R$/L'}, inplace=True)
+
+df_main['ANO'] = df_main['DATA'].apply(lambda x: str(x.year)) # Criando uma coluna ano e com data no ano da coluna DATA
+
+df_main = df_main[df_main.PRODUTO == 'GASOLINA COMUM'] # Selecionando na coluna produto apenas dos casos de GASOLINA COMUM
+df_main = df_main.reset_index()
+
+df_main.drop(['UNIDADE DE MEDIDA', 'COEF DE VARIAÇÃO REVENDA','COEF DE VARIAÇÃO DISTRIBUIÇÃO', 
+              'NÚMERO DE POSTOS PESQUISADOS', 'DATA INICIAL', 'DATA FINAL', 'PREÇO MÁXIMO DISTRIBUIÇÃO',
+              'DESVIO PADRÃO DISTRIBUIÇÃO', 'MARGEM MÉDIA REVENDA', 'PREÇO MÍNIMO REVENDA', 'PREÇO MÁXIMO REVENDA',
+              'PRODUTO', 'PREÇO MÉDIO DISTRIBUIÇÃO', 'DESVIO PADRÃO REVENDA','PREÇO MÍNIMO DISTRIBUIÇÃO'], inplace=True, axis=1) #axis=1 signiifica que está sendo exluido na vertical e não na horizontal
 
 # =========  Layout  =========== #
 app.layout = dbc.Container(children=[
